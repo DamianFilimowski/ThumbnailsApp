@@ -1,2 +1,4 @@
 Django==4.2.5
 djangorestframework==3.14
+sorl-thumbnail==12.9
+Pillow=10.0
