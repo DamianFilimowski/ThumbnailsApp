@@ -1,4 +1,5 @@
 from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -10,6 +11,7 @@ from .serializers import ImageSerializer
 class ImageUploadView(APIView):
     queryset = Image.objects.all()
     parser_classes = (MultiPartParser,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, filename):
         file_serializer = ImageSerializer(data=request.data)
