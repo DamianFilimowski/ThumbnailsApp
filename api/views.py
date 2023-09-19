@@ -14,6 +14,7 @@ class ImageUploadView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, filename):
+        request.data['user'] = request.user.id
         file_serializer = ImageSerializer(data=request.data)
         print(file_serializer.initial_data)
 
