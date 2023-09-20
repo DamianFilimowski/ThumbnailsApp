@@ -1,6 +1,9 @@
+from pathlib import Path
+
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -21,7 +24,11 @@ class ImageUploadView(APIView):
     def post(self, request, filename):
         request.data['user'] = request.user.id
         file_serializer = ImageSerializer(data=request.data)
-        print(file_serializer.initial_data)
+
+        valid_extensions = ['.jpg', '.jpeg', '.png']
+        file_extension = Path(request.FILES['image'].name).suffix.lower()
+        if file_extension not in valid_extensions:
+            raise ValidationError('Invalid file type. Only .jpg and .png files are allowed.')
 
         if file_serializer.is_valid():
             file_serializer.save()
