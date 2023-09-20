@@ -17,6 +17,8 @@ class ThumbnailSize(models.Model):
 class Plan(models.Model):
     name = models.CharField(max_length=100)
     sizes = models.ManyToManyField(ThumbnailSize)
+    original = models.BooleanField(default=False)
+    exp_link = models.BooleanField(default=False)
 
 
 class Image(models.Model):
