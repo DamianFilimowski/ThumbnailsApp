@@ -8,12 +8,14 @@ from accounts.models import CustomUser
 
 
 class ThumbnailSize(models.Model):
-    size = models.PositiveIntegerField()
+    height = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f'Thumbnail {self.height} height'
 
 
 class Plan(models.Model):
     name = models.CharField(max_length=100)
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True)
     sizes = models.ManyToManyField(ThumbnailSize)
 
 
@@ -21,3 +23,7 @@ class Image(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     image = ImageField(upload_to='post_images')
 
+
+class UserPlan(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    Plan = models.OneToOneField(Plan, on_delete=models.CASCADE)
