@@ -1,3 +1,11 @@
-from django.test import TestCase
+import pytest
+from django.test import Client
+from django.urls import reverse
 
-# Create your tests here.
+browser = Client()
+
+@pytest.mark.django_db
+def test_image_view(user, image):
+    url = reverse('thumbnails:image', kwargs={'pk':image.id})
+    response = browser.get(url)
+    assert response.status_code == 200
