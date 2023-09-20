@@ -33,3 +33,13 @@ def test_image_thumbnail_does_not_exists():
     url = reverse('thumbnails:thumbnail', kwargs={'pk': 1, 'size': 400})
     response = browser.get(url)
     assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_image_upload(user):
+    user, authenticate = user
+    url = reverse('api:upload-image', kwargs={'filename': "abc"})
+    data = {'image': 'image.jpg'}
+    response = browser.post(url, headers=authenticate, json=data)
+    assert response.status_code == 201
+
