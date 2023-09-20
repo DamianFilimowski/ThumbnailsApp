@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import MultiPartParser
@@ -58,11 +59,14 @@ def UserImageListView(request):
 @permission_classes([IsAuthenticated])
 def GetExpLink(request):
     user = request.user
+    image = request.data['image']
+    image_object = get_object_or_404(Image, id=image)
+    if image_object.user == user:
+        return Response("That image doesn't belong to You!", status=status.HTTP_401_UNAUTHORIZED)
     current_time = timezone.now()
     expiration_time = int(request.data['expiration_time'])
     expiration_time = current_time + timezone.timedelta(seconds=expiration_time)
     expiration_time = expiration_time.isoformat()
-    image = request.data['image']
     signed_link = signing.dumps({'image': image, 'expiration_time': expiration_time})
     url = request.build_absolute_uri(reverse('thumbnails:verify-signed-link', args=[signed_link]))
 
