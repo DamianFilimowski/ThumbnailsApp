@@ -16,6 +16,6 @@ class ImageView(View):
 class ImageThumbnailView(View):
     def get(self, request, pk, size):
         image = get_object_or_404(Image, pk=pk)
-        size = f'{size}x{size}'
+        size = f'{size}'
         return render(request, 'thumbnails/image_thumbnail.html', {'image': image, 'size': size})
 
