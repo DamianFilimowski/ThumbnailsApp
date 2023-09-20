@@ -8,4 +8,5 @@ urlpatterns = [
     path('obtain-auth-token/', obtain_auth_token, name='obtain-auth-token'),
     path('upload-image/<str:filename>/', ImageUploadView.as_view(), name='upload-image'),
     path('image-list/', UserImageListView, name='image-list'),
+    path('get-exp-link/', GetExpLink, name='get-exp-link'),
 ]

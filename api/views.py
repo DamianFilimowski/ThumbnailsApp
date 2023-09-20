@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from django.core import signing
+from django.utils import timezone
 
 from .models import Image, UserPlan
 from .serializers import ImageSerializer
@@ -37,8 +39,10 @@ def UserImageListView(request):
     image_data = []
 
     for image in images:
-        image_info = {'original': request.build_absolute_uri(
-            reverse('thumbnails:image', args=[image.pk]))}
+        image_info = {}
+        if user_plan.Plan.original:
+            image_info['original'] = request.build_absolute_uri(
+                reverse('thumbnails:image', args=[image.pk]))
 
         for size in plans:
             thumbnail_url = request.build_absolute_uri(reverse('thumbnails:thumbnail', args=[image.pk, size.height]))
@@ -50,4 +54,16 @@ def UserImageListView(request):
     return Response(data, status=status.HTTP_200_OK)
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def GetExpLink(request):
+    user = request.user
+    current_time = timezone.now()
+    expiration_time = int(request.data['expiration_time'])
+    expiration_time = current_time + timezone.timedelta(seconds=expiration_time)
+    expiration_time = expiration_time.isoformat()
+    image = request.data['image']
+    signed_link = signing.dumps({'image': image, 'expiration_time': expiration_time})
+    url = request.build_absolute_uri(reverse('thumbnails:verify-signed-link', args=[signed_link]))
 
+    return Response(url, status=status.HTTP_200_OK)
