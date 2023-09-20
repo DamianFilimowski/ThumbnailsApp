@@ -20,6 +20,9 @@ class Plan(models.Model):
     original = models.BooleanField(default=False)
     exp_link = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f'"{self.name}" Plan'
+
 
 class Image(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
