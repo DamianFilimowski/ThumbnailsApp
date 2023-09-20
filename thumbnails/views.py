@@ -11,3 +11,11 @@ class ImageView(View):
     def get(self, request, pk):
         image = get_object_or_404(Image, pk=pk)
         return render(request, 'thumbnails/image_original.html', {'image': image})
+
+
+class ImageThumbnailView(View):
+    def get(self, request, pk, size):
+        image = get_object_or_404(Image, pk=pk)
+        size = f'{size}x{size}'
+        return render(request, 'thumbnails/image_thumbnail.html', {'image': image, 'size': size})
+
