@@ -9,8 +9,8 @@ from api.models import Image
 def user():
     u = CustomUser.objects.create(username='test_user')
     token, created = Token.objects.get_or_create(user=u)
-    authenticate = {'Authorization': f'Token {token}'}
-    return u, authenticate
+    token = f'Token {token}'
+    return u, token
 
 
 @pytest.fixture

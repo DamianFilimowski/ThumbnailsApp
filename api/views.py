@@ -22,7 +22,6 @@ class ImageUploadView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, filename):
-        request.data['user'] = request.user.id
         file_serializer = ImageSerializer(data=request.data)
 
         valid_extensions = ['.jpg', '.jpeg', '.png']
@@ -31,7 +30,7 @@ class ImageUploadView(APIView):
             raise ValidationError('Invalid file type. Only .jpg and .png files are allowed.')
 
         if file_serializer.is_valid():
-            file_serializer.save()
+            file_serializer.save(user=request.user)
             return Response(file_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,6 +1,9 @@
 import pytest
 from django.test import Client
 from django.urls import reverse
+from django.core.files.uploadedfile import  SimpleUploadedFile
+
+from api.models import Image
 
 browser = Client()
 
@@ -37,9 +40,12 @@ def test_image_thumbnail_does_not_exists():
 
 @pytest.mark.django_db
 def test_image_upload(user):
-    user, authenticate = user
+    user, token = user
     url = reverse('api:upload-image', kwargs={'filename': "abc"})
-    data = {'image': 'image.jpg'}
-    response = browser.post(url, headers=authenticate, json=data)
+    with open('./tests/test.jpg', 'rb') as image_file:
+        data = {'image': image_file}
+        response = browser.post(url, data=data, HTTP_AUTHORIZATION=token)
+    image_id = response.data.get('id')
     assert response.status_code == 201
+    assert Image.objects.filter(id=image_id, user=user)
 

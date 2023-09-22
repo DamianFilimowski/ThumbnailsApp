@@ -25,7 +25,7 @@ class Plan(models.Model):
 
 
 class Image(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
     image = ImageField(upload_to='post_images')
 
 
