@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -61,13 +61,27 @@ def UserImageListView(request):
     return Response(data, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+class HasExpLinkPermission(BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        image_id = request.data.get('image')
+        image_object = get_object_or_404(Image, id=image_id)
+        if image_object.user != user:
+            return False
+        user_plan = get_object_or_404(UserPlan, user=user)
+        return user_plan.plan.exp_link
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, HasExpLinkPermission])
 def GetExpLink(request):
     user = request.user
+    if request.data.get('image', None) is None or request.data.get('expiration_time', None) is None:
+        return Response("Missing parameter", status=status.HTTP_400_BAD_REQUEST)
     image = request.data['image']
     image_object = get_object_or_404(Image, id=image)
-    if image_object.user == user:
+    if image_object.user != user:
         return Response("That image doesn't belong to You!", status=status.HTTP_401_UNAUTHORIZED)
     current_time = timezone.now()
     expiration_time = int(request.data['expiration_time'])

@@ -111,3 +111,47 @@ def test_user_image_list_not_auth():
     url = reverse('api:image-list')
     response = browser.get(url)
     assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_get_exp_link(user, image, plan_enterprise):
+    url = reverse('api:get-exp-link')
+    user, token = user
+    data = {'image': '1',
+            'expiration_time': '50'}
+    UserPlan.objects.create(user=user, plan=plan_enterprise)
+    response = browser.post(url, data, HTTP_AUTHORIZATION=token)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_get_exp_link_missing_parameter(user, image, plan_enterprise):
+    url = reverse('api:get-exp-link')
+    user, token = user
+    data = {'image': '1'}
+    UserPlan.objects.create(user=user, plan=plan_enterprise)
+    response = browser.post(url, data, HTTP_AUTHORIZATION=token)
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_get_exp_link_not_auth(user, image, plan_enterprise):
+    url = reverse('api:get-exp-link')
+    user, token = user
+    data = {'image': '1',
+            'expiration_time': '50'}
+    UserPlan.objects.create(user=user, plan=plan_enterprise)
+    response = browser.post(url, data)
+    assert response.status_code == 401
+
+@pytest.mark.django_db
+def test_get_exp_link_not_users_image(user, image, plan_enterprise):
+    url = reverse('api:get-exp-link')
+    user, token = user
+    image.user = None
+    image.save()
+    data = {'image': '1',
+            'expiration_time': '50'}
+    UserPlan.objects.create(user=user, plan=plan_enterprise)
+    response = browser.post(url, data)
+    assert response.status_code == 401
