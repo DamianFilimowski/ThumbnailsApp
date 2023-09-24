@@ -4,7 +4,7 @@ from django.test import Client
 from django.urls import reverse
 from django.core.files.uploadedfile import  SimpleUploadedFile
 
-from api.models import Image
+from api.models import Image, UserPlan
 
 browser = Client()
 
@@ -72,3 +72,42 @@ def test_image_upload_not_auth():
     with pytest.raises(ObjectDoesNotExist):
         Image.objects.get(id=image_id)
 
+
+@pytest.mark.django_db
+def test_user_image_list_basic_plan(user, image, plan_basic):
+    url = reverse('api:image-list')
+    user, token = user
+    UserPlan.objects.create(user=user, plan=plan_basic)
+    response = browser.get(url, HTTP_AUTHORIZATION=token)
+    assert response.status_code == 200
+    assert response.data['images'][0]['thumbnail_height_200px']
+    assert 'original' not in response.data['images'][0]
+
+
+@pytest.mark.django_db
+def test_user_image_list_premium_plan(user, image, plan_premium):
+    url = reverse('api:image-list')
+    user, token = user
+    UserPlan.objects.create(user=user, plan=plan_premium)
+    response = browser.get(url, HTTP_AUTHORIZATION=token)
+    assert response.status_code == 200
+    assert response.data['images'][0]['thumbnail_height_200px']
+    assert response.data['images'][0]['original']
+
+
+@pytest.mark.django_db
+def test_user_image_list_enterprise_plan(user, image, plan_enterprise):
+    url = reverse('api:image-list')
+    user, token = user
+    UserPlan.objects.create(user=user, plan=plan_enterprise)
+    response = browser.get(url, HTTP_AUTHORIZATION=token)
+    assert response.status_code == 200
+    assert response.data['images'][0]['thumbnail_height_200px']
+    assert response.data['images'][0]['original']
+
+
+@pytest.mark.django_db
+def test_user_image_list_not_auth():
+    url = reverse('api:image-list')
+    response = browser.get(url)
+    assert response.status_code == 401

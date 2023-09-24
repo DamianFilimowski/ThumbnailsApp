@@ -31,4 +31,4 @@ class Image(models.Model):
 
 class UserPlan(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    Plan = models.OneToOneField(Plan, on_delete=models.CASCADE)
+    plan = models.OneToOneField(Plan, on_delete=models.CASCADE)

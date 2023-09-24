@@ -41,13 +41,13 @@ class ImageUploadView(APIView):
 def UserImageListView(request):
     user = request.user
     user_plan = UserPlan.objects.get(user=user)
-    plans = user_plan.Plan.sizes.all()
+    plans = user_plan.plan.sizes.all()
     images = Image.objects.filter(user=user)
     image_data = []
 
     for image in images:
         image_info = {}
-        if user_plan.Plan.original:
+        if user_plan.plan.original:
             image_info['original'] = request.build_absolute_uri(
                 reverse('thumbnails:image', args=[image.pk]))
 
