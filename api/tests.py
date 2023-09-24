@@ -24,19 +24,33 @@ def test_image_does_not_exists():
     assert response.status_code == 404
 
 
-# @pytest.mark.django_db
-# def test_image_thumbnail(image):
-#     url = reverse('thumbnails:thumbnail', kwargs={'pk': image.id, 'size': 400})
-#     response = browser.get(url)
-#     assert response.status_code == 200
-#     assert response.context['image'] == image
-#
-#
-# @pytest.mark.django_db
-# def test_image_thumbnail_does_not_exists():
-#     url = reverse('thumbnails:thumbnail', kwargs={'pk': 1, 'size': 400})
-#     response = browser.get(url)
-#     assert response.status_code == 404
+@pytest.mark.django_db
+def test_image_thumbnail(image_file, user, plan_enterprise):
+    user, token = user
+    url = reverse('thumbnails:thumbnail', kwargs={'pk': image_file.id, 'size': 200})
+    browser.force_login(user)
+    UserPlan.objects.create(user=user, plan=plan_enterprise)
+    response = browser.get(url)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_image_thumbnail_not_auth(image_file, user):
+    url = reverse('thumbnails:thumbnail', kwargs={'pk': image_file.id, 'size': 200})
+    response = browser.get(url)
+    assert response.status_code == 302
+
+
+@pytest.mark.django_db
+def test_image_thumbnail_not_owner(image_file, user, plan_enterprise):
+    user, token = user
+    url = reverse('thumbnails:thumbnail', kwargs={'pk': image_file.id, 'size': 200})
+    image_file.user = None
+    image_file.save()
+    browser.force_login(user)
+    UserPlan.objects.create(user=user, plan=plan_enterprise)
+    response = browser.get(url)
+    assert response.status_code == 403
 
 
 @pytest.mark.django_db
@@ -143,6 +157,7 @@ def test_get_exp_link_not_auth(user, image, plan_enterprise):
     UserPlan.objects.create(user=user, plan=plan_enterprise)
     response = browser.post(url, data)
     assert response.status_code == 401
+
 
 @pytest.mark.django_db
 def test_get_exp_link_not_users_image(user, image, plan_enterprise):

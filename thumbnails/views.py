@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core import signing
 from django.http import HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404, redirect
@@ -19,7 +19,7 @@ class ImageView(View):
         return render(request, 'thumbnails/image_original.html', {'image': image})
 
 
-class ImageThumbnailView(UserPassesTestMixin, View):
+class ImageThumbnailView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         size = self.kwargs['size']

@@ -1,5 +1,6 @@
 import pytest
 from rest_framework.authtoken.models import Token
+from django.core.files import File
 
 from accounts.models import CustomUser
 from api.models import Image, Plan, ThumbnailSize
@@ -17,6 +18,15 @@ def user():
 def image(user):
     user, token = user
     image = Image.objects.create(user=user, image='image.jpg')
+    return image
+
+
+@pytest.fixture
+def image_file(user):
+    user, token = user
+    with open('./tests/test.jpg', 'rb') as image_file:
+        django_file = File(image_file)
+        image = Image.objects.create(user=user, image=django_file)
     return image
 
 
