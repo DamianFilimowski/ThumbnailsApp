@@ -1,4 +1,5 @@
 import pytest
+from django.core.exceptions import ObjectDoesNotExist
 from django.test import Client
 from django.urls import reverse
 from django.core.files.uploadedfile import  SimpleUploadedFile
@@ -48,4 +49,26 @@ def test_image_upload(user):
     image_id = response.data.get('id')
     assert response.status_code == 201
     assert Image.objects.filter(id=image_id, user=user)
+
+
+@pytest.mark.django_db
+def test_image_upload_wrong_format(user):
+    user, token = user
+    url = reverse('api:upload-image', kwargs={'filename': "abc"})
+    with open('./tests/test.txt', 'rb') as image_file:
+        data = {'image': image_file}
+        response = browser.post(url, data=data, HTTP_AUTHORIZATION=token)
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_image_upload_not_auth():
+    url = reverse('api:upload-image', kwargs={'filename': "abc"})
+    with open('./tests/test.jpg', 'rb') as image_file:
+        data = {'image': image_file}
+        response = browser.post(url, data=data)
+    image_id = response.data.get('id')
+    assert response.status_code == 401
+    with pytest.raises(ObjectDoesNotExist):
+        Image.objects.get(id=image_id)
 
