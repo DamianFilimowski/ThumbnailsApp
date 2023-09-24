@@ -79,6 +79,8 @@ def GetExpLink(request):
     user = request.user
     if request.data.get('image', None) is None or request.data.get('expiration_time', None) is None:
         return Response("Missing parameter", status=status.HTTP_400_BAD_REQUEST)
+    if int(request.data['expiration_time']) > 30000 or int(request.data['expiration_time']) < 300:
+        return Response("Expiration time must be between 300 and 30000", status=status.HTTP_400_BAD_REQUEST)
     image = request.data['image']
     image_object = get_object_or_404(Image, id=image)
     if image_object.user != user:
