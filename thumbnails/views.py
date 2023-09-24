@@ -1,11 +1,13 @@
 from datetime import datetime
 
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core import signing
 from django.http import HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from django.utils import timezone
-from api.models import Image
+from api.models import Image, UserPlan
+from thumbnails.utils import if_size_in_plan
 
 
 # Create your views here.
@@ -17,7 +19,14 @@ class ImageView(View):
         return render(request, 'thumbnails/image_original.html', {'image': image})
 
 
-class ImageThumbnailView(View):
+class ImageThumbnailView(UserPassesTestMixin, View):
+
+    def test_func(self):
+        size = self.kwargs['size']
+        image = get_object_or_404(Image, id=self.kwargs['pk'])
+        user_plan = get_object_or_404(UserPlan, user=self.request.user)
+        return if_size_in_plan(size, user_plan) and self.request.user == image.user
+
     def get(self, request, pk, size):
         image = get_object_or_404(Image, pk=pk)
         size = f'{size}'
